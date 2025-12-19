@@ -10,3 +10,8 @@ claude mcp add --transport sse crawl4ai-rag http://localhost:8052/sse
 claude mcp add neon -s user -- npx -y @neondatabase/mcp-server-neo start [neon_api_key]
 
 * start plan mode
+
+### ingest
+python -m ingestion.ingest
+python -m agent.api
+python cli.py

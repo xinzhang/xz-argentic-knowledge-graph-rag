@@ -1,7 +1,47 @@
 services:
 
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: agentic-rag-postgres
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-agentic_rag}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - agentic-rag-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: agentic-rag-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    ports:
+      - "5050:80"
+    volumes:
+      - ./pgadmin/data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - agentic-rag-network
+
   neo4j:
     image: neo4j:latest
+    container_name: agentic-rag-neo4j
     volumes:
         - ./neo4j/logs:/logs
         - ./neo4j/config:/config
@@ -14,3 +54,9 @@ services:
     environment:
         - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/your_password}
     restart: always
+    networks:
+      - agentic-rag-network
+
+networks:
+  agentic-rag-network:
+    driver: bridge

@@ -194,3 +194,6 @@ secrets/
 *.key
 *.pem
 *.crt
+
+postgres/data/
+pgadmin/data/
